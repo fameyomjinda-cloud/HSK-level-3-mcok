@@ -1,0 +1,176 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1.5rem 0}
+.header{margin-bottom:1.5rem}
+.header h1{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.header p{font-size:13px;color:var(--color-text-secondary)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem;align-items:center}
+.filter-btn{font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.filter-btn.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.progress{font-size:12px;color:var(--color-text-tertiary);margin-left:auto}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:12px;cursor:pointer;transition:border-color .15s}
+.card:hover{border-color:var(--color-border-secondary)}
+.card.done{border-left:3px solid #1D9E75}
+.card-top{display:flex;align-items:flex-start;gap:10px}
+.num{font-size:12px;font-weight:500;min-width:24px;color:var(--color-text-tertiary);padding-top:2px}
+.topic-badge{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--color-background-secondary);color:var(--color-text-secondary);white-space:nowrap}
+.q-cn{font-size:17px;font-weight:500;color:var(--color-text-primary);line-height:1.5;flex:1}
+.q-py{font-size:13px;color:#185FA5;margin-top:4px;line-height:1.6;flex:1}
+.q-th{font-size:13px;color:var(--color-text-secondary);margin-top:2px;flex:1}
+.expand{font-size:12px;color:var(--color-text-tertiary);margin-top:10px;display:flex;align-items:center;gap:4px}
+.answer-box{margin-top:14px;padding:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);display:none}
+.answer-box.open{display:block}
+.answer-box h4{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.answer-line{margin-bottom:8px}
+.answer-cn{font-size:15px;color:var(--color-text-primary);line-height:1.5}
+.answer-py{font-size:12px;color:#185FA5;line-height:1.5}
+.answer-th{font-size:12px;color:var(--color-text-secondary);line-height:1.5;margin-top:2px}
+.vocab{margin-top:10px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary)}
+.vocab h4{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px}
+.vocab-list{display:flex;flex-wrap:wrap;gap:6px}
+.vocab-item{font-size:12px;padding:3px 8px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:8px;color:var(--color-text-primary)}
+.done-btn{margin-top:10px;font-size:12px;padding:5px 12px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.done-btn.marked{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success)}
+.stat-row{display:flex;gap:8px;margin-bottom:1.25rem}
+.stat{flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem;text-align:center}
+.stat .n{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.stat .l{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+</style>
+
+<div class="wrap">
+<div class="header">
+  <h1>HSK 3 — ฝึกพูดภาษาจีน</h1>
+  <p>30 ข้อ ครอบคลุมทุกหัวข้อ พร้อมพินอินและแนวทางการตอบ</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat"><div class="n" id="s-total">30</div><div class="l">ข้อทั้งหมด</div></div>
+  <div class="stat"><div class="n" id="s-done">0</div><div class="l">ฝึกแล้ว</div></div>
+  <div class="stat"><div class="n" id="s-left">30</div><div class="l">คงเหลือ</div></div>
+</div>
+
+<div class="controls" id="filters">
+  <button class="filter-btn active" data-cat="all">ทั้งหมด</button>
+  <button class="filter-btn" data-cat="ตัวเอง">ตัวเอง</button>
+  <button class="filter-btn" data-cat="ครอบครัว">ครอบครัว</button>
+  <button class="filter-btn" data-cat="งาน/เรียน">งาน/เรียน</button>
+  <button class="filter-btn" data-cat="ช้อปปิ้ง">ช้อปปิ้ง</button>
+  <button class="filter-btn" data-cat="ท่องเที่ยว">ท่องเที่ยว</button>
+  <button class="filter-btn" data-cat="สุขภาพ">สุขภาพ</button>
+  <button class="filter-btn" data-cat="สังคม">สังคม</button>
+  <button class="filter-btn" data-cat="ความคิดเห็น">ความคิดเห็น</button>
+</div>
+
+<div id="list"></div>
+</div>
+
+<script>
+const data=[
+{id:1,cat:"ตัวเอง",q:"请介绍一下你自己。",py:"Qǐng jièshào yīxià nǐ zìjǐ.",th:"กรุณาแนะนำตัวเองสักหน่อย",ans:{cn:"我叫李明，今年25岁。我是北京人，现在在上海工作。我在一家公司做销售工作，已经工作两年了。我喜欢运动，尤其是打篮球。",py:"Wǒ jiào Lǐ Míng, jīnnián 25 suì. Wǒ shì Běijīng rén, xiànzài zài Shànghǎi gōngzuò. Wǒ zài yījiā gōngsī zuò xiāoshòu gōngzuò, yǐjīng gōngzuò liǎng nián le. Wǒ xǐhuān yùndòng, yóuqí shì dǎ lánqiú.",th:"ผม/ฉันชื่อหลี่หมิง อายุ 25 ปี เป็นคนปักกิ่ง ตอนนี้ทำงานที่เซี่ยงไฮ้ ทำงานฝ่ายขายในบริษัทมา 2 ปีแล้ว ชอบออกกำลังกาย โดยเฉพาะบาสเกตบอล"},vocab:["介绍 jièshào — แนะนำ","销售 xiāoshòu — การขาย","尤其 yóuqí — โดยเฉพาะ"]},
+{id:2,cat:"ตัวเอง",q:"你的爱好是什么？",py:"Nǐ de àihào shì shénme?",th:"งานอดิเรกของคุณคืออะไร",ans:{cn:"我有很多爱好。平时我喜欢听音乐、看电影，还喜欢爬山。周末的时候，我经常去图书馆看书。我觉得看书让我学到很多东西。",py:"Wǒ yǒu hěn duō àihào. Píngshí wǒ xǐhuān tīng yīnyuè, kàn diànyǐng, hái xǐhuān páshān. Zhōumò de shíhou, wǒ jīngcháng qù túshūguǎn kàn shū. Wǒ juéde kàn shū ràng wǒ xuédào hěn duō dōngxi.",th:"ฉันมีงานอดิเรกหลายอย่าง ปกติชอบฟังเพลง ดูหนัง และปีนเขา วันหยุดสุดสัปดาห์มักไปห้องสมุดอ่านหนังสือ รู้สึกว่าการอ่านหนังสือทำให้เรียนรู้สิ่งต่างๆ ได้มาก"},vocab:["爱好 àihào — งานอดิเรก","平时 píngshí — ปกติ","经常 jīngcháng — บ่อยๆ"]},
+{id:3,cat:"ตัวเอง",q:"你每天几点起床？早上怎么过？",py:"Nǐ měitiān jǐ diǎn qǐchuáng? Zǎoshang zěnme guò?",th:"คุณตื่นนอนกี่โมงทุกวัน และช่วงเช้าเป็นอย่างไร",ans:{cn:"我一般六点半起床。先洗漱，然后吃早饭。早饭我通常吃面包和喝牛奶。吃完早饭以后，我骑自行车去公司，大概需要二十分钟。",py:"Wǒ yībān liù diǎn bàn qǐchuáng. Xiān xǐshù, rán hòu chī zǎofàn. Zǎofàn wǒ tōngcháng chī miànbāo hé hē niúnǎi. Chī wán zǎofàn yǐhòu, wǒ qí zìxíngchē qù gōngsī, dàgài xūyào èrshí fēnzhōng.",th:"ปกติตื่น 6 โมงครึ่ง ล้างหน้าแปรงฟันก่อน แล้วกินข้าวเช้า มักกินขนมปังและดื่มนม หลังอาหารเช้าปั่นจักรยานไปบริษัท ใช้เวลาประมาณ 20 นาที"},vocab:["洗漱 xǐshù — ล้างหน้าแปรงฟัน","通常 tōngcháng — ปกติ","骑自行车 qí zìxíngchē — ปั่นจักรยาน"]},
+{id:4,cat:"ครอบครัว",q:"请介绍一下你的家庭。",py:"Qǐng jièshào yīxià nǐ de jiātíng.",th:"กรุณาแนะนำครอบครัวของคุณ",ans:{cn:"我家有四口人：爸爸、妈妈、姐姐和我。爸爸是医生，妈妈是老师。姐姐已经结婚了，住在另一个城市。我们虽然不住在一起，但感情很好。",py:"Wǒ jiā yǒu sì kǒu rén: bàba, māma, jiějie hé wǒ. Bàba shì yīshēng, māma shì lǎoshī. Jiějie yǐjīng jiéhūn le, zhù zài lìng yīgè chéngshì. Wǒmen suīrán bù zhù zài yīqǐ, dàn gǎnqíng hěn hǎo.",th:"บ้านมี 4 คน คือ พ่อ แม่ พี่สาว และฉัน พ่อเป็นหมอ แม่เป็นครู พี่สาวแต่งงานแล้ว อยู่อีกเมืองหนึ่ง แม้ไม่ได้อยู่ด้วยกัน แต่ความสัมพันธ์ดีมาก"},vocab:["口 kǒu — คำนามนับคน","结婚 jiéhūn — แต่งงาน","感情 gǎnqíng — ความรู้สึก/ความสัมพันธ์"]},
+{id:5,cat:"ครอบครัว",q:"你和父母的关系怎么样？",py:"Nǐ hé fùmǔ de guānxi zěnmeyàng?",th:"ความสัมพันธ์ของคุณกับพ่อแม่เป็นอย่างไร",ans:{cn:"我和父母的关系很好。每周我都会给他们打电话，聊聊最近的情况。节假日的时候，我会回家陪他们。他们很关心我，经常问我工作怎么样、吃得好不好。",py:"Wǒ hé fùmǔ de guānxi hěn hǎo. Měi zhōu wǒ dōu huì gěi tāmen dǎ diànhuà, liáo liáo zuìjìn de qíngkuàng. Jié jiǎrì de shíhou, wǒ huì huí jiā péi tāmen. Tāmen hěn guānxīn wǒ, jīngcháng wèn wǒ gōngzuò zěnmeyàng, chī de hǎo bù hǎo.",th:"ความสัมพันธ์กับพ่อแม่ดีมาก ทุกสัปดาห์โทรหาพวกท่านและคุยเรื่องความเป็นไปต่างๆ วันหยุดจะกลับบ้านไปอยู่เป็นเพื่อน พวกท่านเป็นห่วงมาก มักถามเรื่องงานและการกินอยู่"},vocab:["关系 guānxi — ความสัมพันธ์","节假日 jié jiǎrì — วันหยุดเทศกาล","关心 guānxīn — ห่วงใย"]},
+{id:6,cat:"งาน/เรียน",q:"你的工作/学习怎么样？",py:"Nǐ de gōngzuò/xuéxí zěnmeyàng?",th:"งาน/การเรียนของคุณเป็นอย่างไรบ้าง",ans:{cn:"我的工作还不错。每天上班时间是早上九点到下午六点。工作内容主要是和客户联系，解决他们的问题。虽然有时候很忙，但我觉得这份工作很有意思。",py:"Wǒ de gōngzuò hái búcuò. Měitiān shàngbān shíjiān shì zǎoshang jiǔ diǎn dào xiàwǔ liù diǎn. Gōngzuò nèiróng zhǔyào shì hé kèhù liánxì, jiějué tāmen de wèntí. Suīrán yǒushíhòu hěn máng, dàn wǒ juéde zhè fèn gōngzuò hěn yǒu yìsi.",th:"งานก็ไม่เลว เวลาทำงานแต่ละวันคือเช้า 9 โมงถึงบ่าย 6 โมง งานหลักคือติดต่อลูกค้าและแก้ปัญหาให้พวกเขา แม้บางทีจะยุ่งมาก แต่รู้สึกว่างานนี้น่าสนใจ"},vocab:["内容 nèiróng — เนื้อหา/งาน","客户 kèhù — ลูกค้า","解决 jiějué — แก้ไข/แก้ปัญหา"]},
+{id:7,cat:"งาน/เรียน",q:"你为什么学习汉语？",py:"Nǐ wèishéme xuéxí Hànyǔ?",th:"ทำไมคุณถึงเรียนภาษาจีน",ans:{cn:"我学习汉语有几个原因。首先，中国是一个很重要的国家，学汉语可以帮助我在工作上发展。其次，我对中国文化很感兴趣，比如中国的历史和美食。另外，我有中国朋友，想用汉语和他们交流。",py:"Wǒ xuéxí Hànyǔ yǒu jǐ gè yuányīn. Shǒuxiān, Zhōngguó shì yīgè hěn zhòngyào de guójiā, xué Hànyǔ kěyǐ bāngzhù wǒ zài gōngzuò shàng fāzhǎn. Qícì, wǒ duì Zhōngguó wénhuà hěn gǎn xìngqù, bǐrú Zhōngguó de lìshǐ hé měishí. Lìngwài, wǒ yǒu Zhōngguó péngyou, xiǎng yòng Hànyǔ hé tāmen jiāoliú.",th:"เรียนภาษาจีนด้วยเหตุผลหลายอย่าง ประการแรก จีนเป็นประเทศสำคัญ การเรียนภาษาจีนช่วยพัฒนาด้านงาน ประการที่สอง สนใจวัฒนธรรมจีน เช่น ประวัติศาสตร์และอาหาร นอกจากนี้ยังมีเพื่อนชาวจีน อยากสื่อสารด้วยภาษาจีน"},vocab:["原因 yuányīn — เหตุผล","首先 shǒuxiān — ประการแรก","交流 jiāoliú — สื่อสาร/แลกเปลี่ยน"]},
+{id:8,cat:"งาน/เรียน",q:"你觉得学汉语难不难？",py:"Nǐ juéde xué Hànyǔ nán bu nán?",th:"คุณคิดว่าการเรียนภาษาจีนยากไหม",ans:{cn:"我觉得汉语有难的地方，也有容易的地方。最难的是汉字，因为要记很多字。声调也比较难，说错了意思就不一样了。不过，语法比英语简单。只要多练习，就会进步的。",py:"Wǒ juéde Hànyǔ yǒu nán de dìfāng, yě yǒu róngyì de dìfāng. Zuì nán de shì Hànzì, yīnwèi yào jì hěn duō zì. Shēngdiào yě bǐjiào nán, shuō cuò le yìsi jiù bù yīyàng le. Búguò, yǔfǎ bǐ Yīngyǔ jiǎndān. Zhǐyào duō liànxí, jiù huì jìnbù de.",th:"คิดว่าภาษาจีนมีทั้งส่วนที่ยากและง่าย ยากที่สุดคืออักษรจีนเพราะต้องจำเยอะ วรรณยุกต์ก็ค่อนข้างยาก พูดผิดความหมายก็ต่าง แต่ไวยากรณ์ง่ายกว่าภาษาอังกฤษ ขอแค่ฝึกบ่อยๆ ก็จะก้าวหน้า"},vocab:["汉字 Hànzì — อักษรจีน","声调 shēngdiào — วรรณยุกต์","进步 jìnbù — ก้าวหน้า"]},
+{id:9,cat:"ช้อปปิ้ง",q:"你喜欢去哪里购物？",py:"Nǐ xǐhuān qù nǎlǐ gòuwù?",th:"คุณชอบไปช้อปปิ้งที่ไหน",ans:{cn:"我喜欢去超市和商场购物。超市离我家很近，我每周去一两次，买蔬菜、水果和日用品。有时候我也会在网上购物，比较方便，而且经常有打折活动。",py:"Wǒ xǐhuān qù chāoshì hé shāngchǎng gòuwù. Chāoshì lí wǒ jiā hěn jìn, wǒ měi zhōu qù yī liǎng cì, mǎi shūcài, shuǐguǒ hé rìyòngpǐn. Yǒushíhòu wǒ yě huì zài wǎng shàng gòuwù, bǐjiào fāngbiàn, érqiě jīngcháng yǒu dǎzhé huódòng.",th:"ชอบไปซุปเปอร์มาร์เก็ตและห้างสรรพสินค้า ซุปเปอร์มาร์เก็ตอยู่ใกล้บ้าน ไปสัปดาห์ละ 1-2 ครั้ง ซื้อผัก ผลไม้ และของใช้ประจำวัน บางทีก็ช้อปออนไลน์ สะดวกกว่า และมีโปรลดราคาบ่อย"},vocab:["超市 chāoshì — ซุปเปอร์มาร์เก็ต","日用品 rìyòngpǐn — ของใช้ประจำวัน","打折 dǎzhé — ลดราคา"]},
+{id:10,cat:"ช้อปปิ้ง",q:"你上次买的东西是什么？贵不贵？",py:"Nǐ shàngcì mǎi de dōngxi shì shénme? Guì bu guì?",th:"ครั้งล่าสุดที่คุณซื้อของคืออะไร ราคาแพงไหม",ans:{cn:"上个周末我买了一件衬衫。我在商场逛了很久，最后选了一件蓝色的。价格是两百八十块，我觉得还可以，不贵也不便宜。质量很好，穿起来很舒服。",py:"Shàng gè zhōumò wǒ mǎi le yī jiàn chènshān. Wǒ zài shāngchǎng guàng le hěn jiǔ, zuìhòu xuǎn le yī jiàn lán sè de. Jiàgé shì liǎng bǎi bāshí kuài, wǒ juéde hái kěyǐ, bù guì yě bù piányí. Zhìliàng hěn hǎo, chuān qǐlái hěn shūfu.",th:"สุดสัปดาห์ที่แล้วซื้อเสื้อเชิ้ต เดินเลือกในห้างนานมาก สุดท้ายเลือกสีฟ้า ราคา 280 หยวน รู้สึกว่าพอรับได้ ไม่แพงไม่ถูก คุณภาพดี ใส่แล้วสบาย"},vocab:["衬衫 chènshān — เสื้อเชิ้ต","质量 zhìliàng — คุณภาพ","舒服 shūfu — สบาย"]},
+{id:11,cat:"ช้อปปิ้ง",q:"你更喜欢网购还是去商店买？为什么？",py:"Nǐ gèng xǐhuān wǎng gòu háishi qù shāngdiàn mǎi? Wèishéme?",th:"คุณชอบช้อปออนไลน์หรือไปร้านมากกว่า เพราะอะไร",ans:{cn:"我更喜欢网购。因为网购很方便，不用出门，随时都可以买。而且网上的商品种类多，价格也比较便宜。但是我觉得买衣服的时候还是去商店好，因为可以试穿。",py:"Wǒ gèng xǐhuān wǎng gòu. Yīnwèi wǎng gòu hěn fāngbiàn, bú yòng chūmén, suíshí dōu kěyǐ mǎi. Érqiě wǎng shàng de shāngpǐn zhǒnglèi duō, jiàgé yě bǐjiào piányí. Dànshì wǒ juéde mǎi yīfu de shíhou háishi qù shāngdiàn hǎo, yīnwèi kěyǐ shì chuān.",th:"ชอบช้อปออนไลน์มากกว่า เพราะสะดวก ไม่ต้องออกจากบ้าน ซื้อได้ตลอดเวลา สินค้าออนไลน์มีหลากหลาย ราคาถูกกว่าด้วย แต่ถ้าซื้อเสื้อผ้าก็ยังดีกว่าไปร้าน เพราะได้ลองสวมใส่"},vocab:["随时 suíshí — ตลอดเวลา","种类 zhǒnglèi — ประเภท/ชนิด","试穿 shì chuān — ลองสวม"]},
+{id:12,cat:"ท่องเที่ยว",q:"你去过哪些地方旅游？",py:"Nǐ qù guò nǎxiē dìfāng lǚyóu?",th:"คุณเคยไปท่องเที่ยวที่ไหนบ้าง",ans:{cn:"我去过几个地方旅游。在中国，我去过北京和上海。北京的历史很悠久，我参观了故宫和长城，觉得非常壮观。上海很现代，高楼大厦很多。去年我还去了日本，那里的食物非常好吃。",py:"Wǒ qù guò jǐ gè dìfāng lǚyóu. Zài Zhōngguó, wǒ qù guò Běijīng hé Shànghǎi. Běijīng de lìshǐ hěn yōujiǔ, wǒ cānguān le Gùgōng hé Chángchéng, juéde fēicháng zhuàngguān. Shànghǎi hěn xiàndài, gāolóu dàshà hěn duō. Qùnián wǒ hái qù le Rìběn, nàlǐ de shíwù fēicháng hǎo chī.",th:"เคยท่องเที่ยวหลายที่ ในจีนเคยไปปักกิ่งและเซี่ยงไฮ้ ปักกิ่งมีประวัติศาสตร์ยาวนาน เคยไปเยี่ยมชมพระราชวังต้องห้ามและกำแพงเมืองจีน รู้สึกยิ่งใหญ่อลังการมาก เซี่ยงไฮ้ทันสมัยมีตึกสูงเยอะ ปีที่แล้วยังไปญี่ปุ่น อาหารที่นั่นอร่อยมาก"},vocab:["历史 lìshǐ — ประวัติศาสตร์","参观 cānguān — เยี่ยมชม","壮观 zhuàngguān — ยิ่งใหญ่อลังการ"]},
+{id:13,cat:"ท่องเที่ยว",q:"你最想去哪里旅游？为什么？",py:"Nǐ zuì xiǎng qù nǎlǐ lǚyóu? Wèishéme?",th:"คุณอยากไปท่องเที่ยวที่ไหนมากที่สุด เพราะอะไร",ans:{cn:"我最想去云南旅游。因为云南的自然风景非常美丽，有高山、湖泊和各种各样的民族文化。我特别想看看丽江古城和洱海。而且云南的天气很好，不太热也不太冷。",py:"Wǒ zuì xiǎng qù Yúnnán lǚyóu. Yīnwèi Yúnnán de zìrán fēngjǐng fēicháng měilì, yǒu gāoshān, húpō hé gè zhǒng gè yàng de mínzú wénhuà. Wǒ tèbié xiǎng kànkàn Lìjiāng gǔchéng hé Ěrhǎi. Érqiě Yúnnán de tiānqì hěn hǎo, bú tài rè yě bú tài lěng.",th:"อยากไปยูนนานมากที่สุด เพราะธรรมชาติที่นั่นสวยงามมาก มีภูเขาสูง ทะเลสาบ และวัฒนธรรมชนกลุ่มน้อยหลากหลาย อยากไปดูเมืองเก่าลี่เจียงและทะเลสาบเอ๋อร์ไห่ อีกทั้งอากาศดีไม่ร้อนไม่หนาวมาก"},vocab:["自然风景 zìrán fēngjǐng — ทัศนียภาพธรรมชาติ","民族 mínzú — กลุ่มชาติพันธุ์","古城 gǔchéng — เมืองเก่า"]},
+{id:14,cat:"ท่องเที่ยว",q:"你喜欢自助游还是跟团游？",py:"Nǐ xǐhuān zìzhù yóu háishi gēn tuán yóu?",th:"คุณชอบท่องเที่ยวแบบอิสระหรือทัวร์กรุ๊ปมากกว่า",ans:{cn:"我更喜欢自助游。自助游比较自由，可以自己安排时间，想去哪里就去哪里。虽然需要自己订酒店、买机票，有时候也会遇到麻烦，但总体来说更有意思。",py:"Wǒ gèng xǐhuān zìzhù yóu. Zìzhù yóu bǐjiào zìyóu, kěyǐ zìjǐ ānpái shíjiān, xiǎng qù nǎlǐ jiù qù nǎlǐ. Suīrán xūyào zìjǐ dìng jiǔdiàn, mǎi jīpiào, yǒushíhòu yě huì yùdào máfan, dàn zǒngtǐ lái shuō gèng yǒu yìsi.",th:"ชอบท่องเที่ยวแบบอิสระมากกว่า เพราะอิสระกว่า จัดเวลาเองได้ อยากไปไหนก็ไป แม้ต้องจองโรงแรม ซื้อตั๋วเครื่องบินเอง และบางทีอาจเจอปัญหา แต่โดยรวมสนุกกว่า"},vocab:["自助游 zìzhù yóu — ท่องเที่ยวอิสระ","跟团游 gēn tuán yóu — ทัวร์กรุ๊ป","安排 ānpái — จัดเตรียม/วางแผน"]},
+{id:15,cat:"สุขภาพ",q:"你平时怎么保持健康？",py:"Nǐ píngshí zěnme bǎochí jiànkāng?",th:"ปกติคุณดูแลสุขภาพอย่างไร",ans:{cn:"我平时注意饮食，尽量少吃油腻的食物，多吃蔬菜水果。我每周运动三四次，主要是跑步和游泳。而且我每天晚上十一点以前睡觉，保证有足够的睡眠。",py:"Wǒ píngshí zhùyì yǐnshí, jǐnliàng shǎo chī yóunì de shíwù, duō chī shūcài shuǐguǒ. Wǒ měi zhōu yùndòng sān sì cì, zhǔyào shì pǎobù hé yóuyǒng. Érqiě wǒ měitiān wǎnshang shíyī diǎn yǐqián shuìjiào, bǎozhèng yǒu zúgòu de shuìmián.",th:"ปกติใส่ใจเรื่องอาหาร พยายามกินอาหารมันน้อยลง กินผักและผลไม้มากขึ้น ออกกำลังกายสัปดาห์ละ 3-4 ครั้ง ส่วนใหญ่วิ่งและว่ายน้ำ และทุกวันนอนก่อน 4 ทุ่ม เพื่อให้นอนหลับเพียงพอ"},vocab:["饮食 yǐnshí — อาหาร/การกินอยู่","油腻 yóunì — มัน/เลี่ยน","保证 bǎozhèng — รับประกัน/ทำให้แน่ใจ"]},
+{id:16,cat:"สุขภาพ",q:"你上次生病是什么时候？怎么了？",py:"Nǐ shàngcì shēngbìng shì shénme shíhou? Zěnme le?",th:"ครั้งล่าสุดที่คุณป่วยคือเมื่อไหร่ และเป็นอะไร",ans:{cn:"上个月我感冒了。开始是头疼、发烧，后来喉咙也疼起来了。我去看了医生，医生说我要多休息、多喝水，还给我开了一些药。吃了三天的药以后，我就好了。",py:"Shàng gè yuè wǒ gǎnmào le. Kāishǐ shì tóuténg, fāshāo, hòulái hóulóng yě téng qǐlái le. Wǒ qù kàn le yīshēng, yīshēng shuō wǒ yào duō xiūxi, duō hē shuǐ, hái gěi wǒ kāi le yīxiē yào. Chī le sān tiān de yào yǐhòu, wǒ jiù hǎo le.",th:"เดือนที่แล้วเป็นหวัด เริ่มจากปวดหัว มีไข้ ต่อมาเจ็บคอด้วย ไปหาหมอ หมอบอกให้พักผ่อนมากๆ ดื่มน้ำเยอะๆ และจ่ายยาให้ กินยา 3 วันก็หายแล้ว"},vocab:["感冒 gǎnmào — เป็นหวัด","发烧 fāshāo — มีไข้","开药 kāi yào — จ่ายยา/สั่งยา"]},
+{id:17,cat:"สุขภาพ",q:"你觉得压力大吗？怎么减压？",py:"Nǐ juéde yālì dà ma? Zěnme jiǎnyā?",th:"คุณรู้สึกมีความเครียดมากไหม คลายเครียดอย่างไร",ans:{cn:"有时候我会感到压力比较大，主要是因为工作上的事情。我减压的方法是听音乐，听音乐可以让我放松。另外，我也会和朋友出去吃饭聊天，这样心情就会变好。",py:"Yǒushíhòu wǒ huì gǎndào yālì bǐjiào dà, zhǔyào shì yīnwèi gōngzuò shàng de shìqíng. Wǒ jiǎnyā de fāngfǎ shì tīng yīnyuè, tīng yīnyuè kěyǐ ràng wǒ fàngsōng. Lìngwài, wǒ yě huì hé péngyou chūqù chīfàn liáotiān, zhèyàng xīnqíng jiù huì biàn hǎo.",th:"บางทีรู้สึกเครียดมาก ส่วนใหญ่เพราะเรื่องงาน วิธีคลายเครียดของฉันคือฟังเพลง ฟังเพลงแล้วรู้สึกผ่อนคลาย นอกจากนี้ยังออกไปกินข้าวและคุยกับเพื่อน แบบนี้อารมณ์ก็จะดีขึ้น"},vocab:["压力 yālì — ความกดดัน/ความเครียด","减压 jiǎnyā — คลายเครียด","放松 fàngsōng — ผ่อนคลาย"]},
+{id:18,cat:"สังคม",q:"你有几个好朋友？你们平时做什么？",py:"Nǐ yǒu jǐ gè hǎo péngyou? Nǐmen píngshí zuò shénme?",th:"คุณมีเพื่อนสนิทกี่คน ปกติทำอะไรด้วยกัน",ans:{cn:"我有三四个好朋友。我们是在大学认识的，虽然现在不在同一个城市，但感情一直很好。我们经常在网上聊天。每隔几个月，我们会找时间聚在一起，一起吃饭、看电影或者去旅游。",py:"Wǒ yǒu sān sì gè hǎo péngyou. Wǒmen shì zài dàxué rèn shí de, suīrán xiànzài bú zài tóngyī gè chéngshì, dàn gǎnqíng yīzhí hěn hǎo. Wǒmen jīngcháng zài wǎng shàng liáotiān. Měi gé jǐ gè yuè, wǒmen huì zhǎo shíjiān jù zài yīqǐ, yīqǐ chīfàn, kàn diànyǐng huòzhě qù lǚyóu.",th:"มีเพื่อนสนิท 3-4 คน รู้จักกันตอนมหาวิทยาลัย แม้ตอนนี้ไม่ได้อยู่เมืองเดียวกัน แต่ยังสนิทกันอยู่ คุยกันออนไลน์บ่อย ทุกสองสามเดือนก็จะนัดรวมตัวกัน ไปกินข้าว ดูหนัง หรือท่องเที่ยว"},vocab:["认识 rènshi — รู้จัก","聚 jù — รวมตัว/นัดพบ","每隔 měi gé — ทุกๆ (ช่วงเวลา)"]},
+{id:19,cat:"สังคม",q:"你们怎么过春节？",py:"Nǐmen zěnme guò Chūnjié?",th:"คุณฉลองตรุษจีนอย่างไร",ans:{cn:"春节是中国最重要的节日。我们全家会回老家过年。除夕晚上，全家人一起吃年夜饭，菜很多，有鱼、饺子、年糕等。吃完饭我们会一起看春晚，然后放烟花。春节期间，我们会互相拜年，小孩子可以收到红包。",py:"Chūnjié shì Zhōngguó zuì zhòngyào de jiérì. Wǒmen quánjiā huì huí lǎojiā guònián. Chúxī wǎnshang, quánjiārén yīqǐ chī niányèfàn, cài hěn duō, yǒu yú, jiǎozi, niángāo děng. Chī wán fàn wǒmen huì yīqǐ kàn Chūnwǎn, rán hòu fàng yānhuā. Chūnjié qījiān, wǒmen huì hùxiāng bàinián, xiǎo háizi kěyǐ shōudào hóngbāo.",th:"ตรุษจีนเป็นเทศกาลสำคัญที่สุดของจีน ทุกคนในครอบครัวจะกลับบ้านเกิดเพื่อฉลองปีใหม่ คืนก่อนตรุษจีนทุกคนกินข้าวร่วมกัน มีอาหารเยอะมาก ทั้งปลา เกี๊ยว ขนมเหนียว ฯลฯ หลังอาหารดูรายการกาล่าทีวีและจุดประทัด ช่วงตรุษจีนจะอวยพรกัน เด็กๆ จะได้รับซองแดง"},vocab:["除夕 Chúxī — คืนก่อนตรุษจีน","年夜饭 niányèfàn — อาหารมื้อค่ำคืนส่งท้ายปี","红包 hóngbāo — ซองแดง/อั่งเปา"]},
+{id:20,cat:"สังคม",q:"中国人的饮食习惯是什么样的？",py:"Zhōngguó rén de yǐnshí xíguàn shì shénme yàng de?",th:"นิสัยการกินของคนจีนเป็นอย่างไร",ans:{cn:"中国人非常重视吃饭。一般来说，中国人一天吃三顿饭。早饭比较简单，午饭和晚饭比较丰盛。中国菜种类很多，各个地方口味不同，有的辣，有的甜，有的咸。中国人喜欢用筷子吃饭，吃饭的时候喜欢大家一起，很热闹。",py:"Zhōngguó rén fēicháng zhòngshì chīfàn. Yībān lái shuō, Zhōngguó rén yī tiān chī sān dùn fàn. Zǎofàn bǐjiào jiǎndān, wǔfàn hé wǎnfàn bǐjiào fēngshèng. Zhōngguó cài zhǒnglèi hěn duō, gège dìfāng kǒuwèi bùtóng, yǒu de là, yǒu de tián, yǒu de xián. Zhōngguó rén xǐhuān yòng kuàizi chīfàn, chīfàn de shíhou xǐhuān dàjiā yīqǐ, hěn rènào.",th:"คนจีนให้ความสำคัญกับการกินข้าวมาก โดยทั่วไปกินวันละ 3 มื้อ มื้อเช้าค่อนข้างง่าย มื้อกลางวันและมื้อเย็นค่อนข้างอุดมสมบูรณ์ อาหารจีนมีหลายชนิด แต่ละภูมิภาครสชาติต่างกัน บางแห่งเผ็ด บางแห่งหวาน บางแห่งเค็ม คนจีนชอบใช้ตะเกียบ และชอบกินข้าวพร้อมกันหลายคน บรรยากาศครึกครื้น"},vocab:["习惯 xíguàn — นิสัย/ความคุ้นเคย","丰盛 fēngshèng — อุดมสมบูรณ์","热闹 rènào — ครึกครื้น/賑賑"]},
+{id:21,cat:"ความคิดเห็น",q:"你觉得手机对生活有什么影响？",py:"Nǐ juéde shǒujī duì shēnghuó yǒu shénme yǐngxiǎng?",th:"คุณคิดว่าโทรศัพท์มือถือมีผลกระทบต่อชีวิตอย่างไร",ans:{cn:"手机对生活的影响很大。好的方面是，手机让我们的生活更方便，可以随时联系别人、查找信息、网购、订外卖等。但是手机也有不好的地方，比如有些人太依赖手机，忘了和身边的人交流，影响了人与人之间的感情。",py:"Shǒujī duì shēnghuó de yǐngxiǎng hěn dà. Hǎo de fāngmiàn shì, shǒujī ràng wǒmen de shēnghuó gèng fāngbiàn, kěyǐ suíshí liánxì biérén, cházhǎo xìnxī, wǎng gòu, dìng wàimài děng. Dànshì shǒujī yě yǒu bù hǎo de dìfāng, bǐrú yǒuxiē rén tài yīlài shǒujī, wàng le hé shēnbiān de rén jiāoliú, yǐngxiǎng le rén yǔ rén zhījiān de gǎnqíng.",th:"โทรศัพท์มือถือมีผลกระทบต่อชีวิตมาก ด้านดีคือทำให้ชีวิตสะดวกสบายยิ่งขึ้น ติดต่อคนอื่นได้ทุกเวลา ค้นหาข้อมูล ช้อปออนไลน์ สั่งอาหาร ฯลฯ แต่ก็มีด้านไม่ดีด้วย เช่น บางคนพึ่งพามือถือมากเกินไป ลืมพูดคุยกับคนรอบข้าง กระทบความสัมพันธ์ระหว่างผู้คน"},vocab:["影响 yǐngxiǎng — ผลกระทบ","依赖 yīlài — พึ่งพา","外卖 wàimài — อาหารสั่งส่ง"]},
+{id:22,cat:"ความคิดเห็น",q:"你认为城市生活和农村生活哪个更好？",py:"Nǐ rènwéi chénɡshì shēnɡhuó hé nónɡcūn shēnɡhuó nǎ gè gèng hǎo?",th:"คุณคิดว่าชีวิตในเมืองกับชนบทอย่างไหนดีกว่ากัน",ans:{cn:"我觉得两种生活各有优点。城市生活工作机会多，交通方便，有各种各样的娱乐活动。但是城市里人很多，空气不太好，生活压力也大。农村生活环境比较安静，空气新鲜，但是就业机会少，生活不太方便。如果可以选择，我更喜欢住在城市，但是周末能去农村放松一下。",py:"Wǒ juéde liǎng zhǒng shēnghuó gè yǒu yōudiǎn. Chéngshì shēnghuó gōngzuò jīhuì duō, jiāotōng fāngbiàn, yǒu gè zhǒng gè yàng de yúlè huódòng. Dànshì chéngshì lǐ rén hěn duō, kōngqì bú tài hǎo, shēnghuó yālì yě dà. Nóngcūn shēnghuó huánjìng bǐjiào ānjìng, kōngqì xīnxiān, dànshì jiùyè jīhuì shǎo, shēnghuó bú tài fāngbiàn. Rúguǒ kěyǐ xuǎnzé, wǒ gèng xǐhuān zhù zài chéngshì, dànshì zhōumò néng qù nóngcūn fàngsōng yīxià.",th:"คิดว่าทั้งสองแบบต่างมีข้อดี ชีวิตในเมืองมีโอกาสงานเยอะ การเดินทางสะดวก มีกิจกรรมบันเทิงหลากหลาย แต่คนเยอะ อากาศไม่ดีนัก ความกดดันชีวิตก็สูง ชีวิตชนบทแวดล้อมเงียบสงบ อากาศบริสุทธิ์ แต่โอกาสงานน้อย ชีวิตไม่ค่อยสะดวก ถ้าเลือกได้ ชอบอยู่เมืองมากกว่า แต่วันหยุดอยากไปชนบทพักผ่อน"},vocab:["各有优点 gè yǒu yōudiǎn — ต่างมีข้อดี","娱乐 yúlè — ความบันเทิง","就业 jiùyè — การจ้างงาน"]},
+{id:23,cat:"ความคิดเห็น",q:"你认为环境保护重要吗？我们应该怎么做？",py:"Nǐ rènwéi huánjìng bǎohù zhòngyào ma? Wǒmen yīnggāi zěnme zuò?",th:"คุณคิดว่าการอนุรักษ์สิ่งแวดล้อมสำคัญไหม เราควรทำอย่างไร",ans:{cn:"我认为环境保护非常重要。因为我们只有一个地球，如果我们不保护环境，将来我们的子孙后代会生活在一个被污染的世界里。我们每个人都应该从小事做起，比如节约用水、节约用电、不乱扔垃圾、尽量少用一次性产品。",py:"Wǒ rènwéi huánjìng bǎohù fēicháng zhòngyào. Yīnwèi wǒmen zhǐ yǒu yīgè dìqiú, rúguǒ wǒmen bù bǎohù huánjìng, jiānglái wǒmen de zǐsūn hòudài huì shēnghuó zài yīgè bèi wūrǎn de shìjiè lǐ. Wǒmen měi gèrén dōu yīnggāi cóng xiǎoshì zuò qǐ, bǐrú jiéyuē yòng shuǐ, jiéyuē yòng diàn, bù luàn rēng lājī, jǐnliàng shǎo yòng yīcìxìng chǎnpǐn.",th:"คิดว่าการอนุรักษ์สิ่งแวดล้อมสำคัญมาก เพราะเรามีโลกใบเดียว ถ้าไม่รักษาสิ่งแวดล้อม ในอนาคตลูกหลานจะต้องอยู่ในโลกที่ปนเปื้อน ทุกคนควรเริ่มจากเรื่องเล็กๆ เช่น ประหยัดน้ำ ประหยัดไฟ ไม่ทิ้งขยะเกลื่อน พยายามใช้ผลิตภัณฑ์ใช้ครั้งเดียวให้น้อยลง"},vocab:["环境保护 huánjìng bǎohù — การอนุรักษ์สิ่งแวดล้อม","污染 wūrǎn — มลพิษ/ปนเปื้อน","一次性 yīcìxìng — ใช้ครั้งเดียวแล้วทิ้ง"]},
+{id:24,cat:"ความคิดเห็น",q:"你觉得现在的年轻人压力大吗？为什么？",py:"Nǐ juéde xiànzài de niánqīng rén yālì dà ma? Wèishéme?",th:"คุณคิดว่าคนหนุ่มสาวในปัจจุบันมีความกดดันมากไหม เพราะอะไร",ans:{cn:"我觉得现在的年轻人压力确实很大。工作方面，竞争越来越激烈，找到好工作不容易。生活方面，房价越来越贵，很多年轻人买不起房子。另外，有些父母对孩子要求很高，孩子从小就有很大的学习压力。",py:"Wǒ juéde xiànzài de niánqīng rén yālì quèshí hěn dà. Gōngzuò fāngmiàn, jìngzhēng yuèláiyuè jīliè, zhǎodào hǎo gōngzuò bù róngyì. Shēnghuó fāngmiàn, fángjià yuèláiyuè guì, hěn duō niánqīng rén mǎi bù qǐ fángzi. Lìngwài, yǒuxiē fùmǔ duì háizi yāoqiú hěn gāo, háizi cóngxiǎo jiù yǒu hěn dà de xuéxí yālì.",th:"คิดว่าคนหนุ่มสาวทุกวันนี้มีความกดดันมากจริงๆ ด้านงาน การแข่งขันรุนแรงขึ้นเรื่อยๆ หางานดีทำได้ยาก ด้านชีวิต ราคาบ้านแพงขึ้นเรื่อยๆ คนหนุ่มสาวหลายคนซื้อบ้านไม่ได้ นอกจากนี้พ่อแม่บางคนคาดหวังสูง ทำให้เด็กตั้งแต่ยังเล็กก็มีความกดดันด้านการเรียนมาก"},vocab:["竞争 jìngzhēng — การแข่งขัน","激烈 jīliè — รุนแรง/ดุเดือด","房价 fángjià — ราคาบ้าน"]},
+{id:25,cat:"งาน/เรียน",q:"你未来有什么计划？",py:"Nǐ wèilái yǒu shénme jìhuà?",th:"คุณมีแผนอะไรในอนาคต",ans:{cn:"我有几个未来的计划。短期内，我想提高自己的汉语水平，争取通过HSK五级考试。工作上，我希望能得到晋升，承担更多的责任。长远来看，我想开一家自己的公司，成为一名创业者。",py:"Wǒ yǒu jǐ gè wèilái de jìhuà. Duǎnqī nèi, wǒ xiǎng tígāo zìjǐ de Hànyǔ shuǐpíng, zhēngqǔ tōngguò HSK wǔ jí kǎoshì. Gōngzuò shàng, wǒ xīwàng néng dédào jìnshēng, chéngdān gèng duō de zérèn. Chángyuǎn lái kàn, wǒ xiǎng kāi yījiā zìjǐ de gōngsī, chéngwéi yī míng chuàngyè zhě.",th:"มีแผนอนาคตหลายอย่าง ระยะสั้นอยากพัฒนาระดับภาษาจีนของตัวเอง ตั้งใจสอบ HSK ระดับ 5 ให้ผ่าน ด้านงานหวังว่าจะได้เลื่อนตำแหน่งและรับผิดชอบมากขึ้น มองระยะยาวอยากเปิดบริษัทของตัวเอง เป็นผู้ประกอบการ"},vocab:["短期 duǎnqī — ระยะสั้น","晋升 jìnshēng — เลื่อนตำแหน่ง","创业者 chuàngyè zhě — ผู้ประกอบการ"]},
+{id:26,cat:"ตัวเอง",q:"你觉得自己是一个什么样的人？",py:"Nǐ juéde zìjǐ shì yīgè shénme yàng de rén?",th:"คุณคิดว่าตัวเองเป็นคนแบบไหน",ans:{cn:"我觉得我是一个比较开朗、热情的人。我喜欢认识新朋友，也喜欢帮助别人。不过，有时候我也会太在意别人的看法，这是我的缺点。我正在努力改变这一点，让自己更加自信。",py:"Wǒ juéde wǒ shì yīgè bǐjiào kāilǎng, rèqíng de rén. Wǒ xǐhuān rènshi xīn péngyou, yě xǐhuān bāngzhù biérén. Búguò, yǒushíhòu wǒ yě huì tài zàiyì biérén de kànfǎ, zhè shì wǒ de quēdiǎn. Wǒ zhèngzài nǔlì gǎibiàn zhè yīdiǎn, ràng zìjǐ gèngjiā zìxìn.",th:"คิดว่าตัวเองเป็นคนค่อนข้างร่าเริงและกระตือรือร้น ชอบทำความรู้จักเพื่อนใหม่และชอบช่วยเหลือผู้อื่น อย่างไรก็ดี บางทีก็ใส่ใจความคิดเห็นของคนอื่นมากเกินไป นี่คือจุดอ่อนของฉัน กำลังพยายามแก้ไขตรงนี้เพื่อให้ตัวเองมั่นใจมากขึ้น"},vocab:["开朗 kāilǎng — ร่าเริง","缺点 quēdiǎn — จุดอ่อน/ข้อเสีย","自信 zìxìn — มั่นใจ"]},
+{id:27,cat:"สังคม",q:"你平时怎么用手机？",py:"Nǐ píngshí zěnme yòng shǒujī?",th:"ปกติคุณใช้โทรศัพท์มือถืออย่างไร",ans:{cn:"我每天都用手机。主要用来发微信和别人联系，看新闻，听音乐。有时候也用手机网购或者订外卖。我还用手机学习汉语，听播客练习听力。我觉得手机给生活带来了很多便利。",py:"Wǒ měitiān dōu yòng shǒujī. Zhǔyào yòng lái fā Wēixìn hé biérén liánxì, kàn xīnwén, tīng yīnyuè. Yǒushíhòu yě yòng shǒujī wǎng gòu huòzhě dìng wàimài. Wǒ hái yòng shǒujī xuéxí Hànyǔ, tīng bōkè liànxí tīnglì. Wǒ juéde shǒujī gěi shēnghuó dài lái le hěn duō biànlì.",th:"ใช้โทรศัพท์ทุกวัน หลักๆ ใช้ WeChat ติดต่อผู้คน อ่านข่าว ฟังเพลง บางทีใช้ช้อปออนไลน์หรือสั่งอาหาร ยังใช้โทรศัพท์เรียนภาษาจีน ฟังพอดแคสต์ฝึกทักษะการฟัง รู้สึกว่าโทรศัพท์ทำให้ชีวิตสะดวกขึ้นมาก"},vocab:["微信 Wēixìn — WeChat","播客 bōkè — พอดแคสต์","便利 biànlì — สะดวก"]},
+{id:28,cat:"ท่องเที่ยว",q:"如果有机会，你想去中国哪个城市？",py:"Rúguǒ yǒu jīhuì, nǐ xiǎng qù Zhōngguó nǎ gè chéngshì?",th:"ถ้ามีโอกาส คุณอยากไปเมืองไหนในจีน",ans:{cn:"如果有机会，我最想去成都。成都是四川省的省会，以美食和熊猫著名。我非常喜欢吃辣的，所以很想去那里吃正宗的四川火锅。另外，成都还有大熊猫基地，我很想去看真正的熊猫。成都人的生活节奏比较慢，感觉很放松。",py:"Rúguǒ yǒu jīhuì, wǒ zuì xiǎng qù Chéngdū. Chéngdū shì Sìchuān shěng de shěnghuì, yǐ měishí hé xióngmāo zhùmíng. Wǒ fēicháng xǐhuān chī là de, suǒyǐ hěn xiǎng qù nàlǐ chī zhèngzōng de Sìchuān huǒguō. Lìngwài, Chéngdū hái yǒu dà xióngmāo jīdì, wǒ hěn xiǎng qù kàn zhēnzhèng de xióngmāo. Chéngdū rén de shēnghuó jiézòu bǐjiào màn, gǎnjué hěn fàngsōng.",th:"ถ้ามีโอกาสอยากไปเฉิงตูมากที่สุด เฉิงตูเป็นเมืองหลวงของมณฑลเสฉวน มีชื่อเสียงด้านอาหารและหมีแพนด้า ชอบกินเผ็ดมาก จึงอยากไปกินหม้อไฟเสฉวนแท้ๆ นอกจากนี้ยังมีฐานวิจัยหมีแพนด้ายักษ์ อยากไปดูหมีแพนด้าตัวจริง จังหวะชีวิตชาวเฉิงตูค่อนข้างช้า รู้สึกผ่อนคลาย"},vocab:["著名 zhùmíng — มีชื่อเสียง","正宗 zhèngzōng — แท้/ดั้งเดิม","节奏 jiézòu — จังหวะ/ก้าว"]},
+{id:29,cat:"ครอบครัว",q:"你父母对你有什么期望？",py:"Nǐ fùmǔ duì nǐ yǒu shénme qīwàng?",th:"พ่อแม่คาดหวังอะไรจากคุณบ้าง",ans:{cn:"我父母对我有一些期望。他们希望我工作稳定、生活幸福。他们也希望我早点结婚，有自己的家庭。另外，他们非常重视健康，经常提醒我注意身体。我尽量满足他们的期望，但有时候也需要按照自己的想法生活。",py:"Wǒ fùmǔ duì wǒ yǒu yīxiē qīwàng. Tāmen xīwàng wǒ gōngzuò wěndìng, shēnghuó xìngfú. Tāmen yě xīwàng wǒ zǎodiǎn jiéhūn, yǒu zìjǐ de jiātíng. Lìngwài, tāmen fēicháng zhòngshì jiànkāng, jīngcháng tíxǐng wǒ zhùyì shēntǐ. Wǒ jǐnliàng mǎnzú tāmen de qīwàng, dàn yǒushíhòu yě xūyào ànzhào zìjǐ de xiǎngfǎ shēnghuó.",th:"พ่อแม่มีความคาดหวังบางอย่างจากฉัน พวกท่านหวังว่าฉันจะมีงานมั่นคงและมีความสุขในชีวิต ยังหวังให้แต่งงานเร็วๆ และมีครอบครัวของตัวเอง นอกจากนี้ยังให้ความสำคัญกับสุขภาพมาก คอยเตือนให้ดูแลร่างกาย พยายามทำตามที่พวกท่านหวัง แต่บางทีก็ต้องใช้ชีวิตตามความคิดของตัวเองด้วย"},vocab:["期望 qīwàng — ความคาดหวัง","稳定 wěndìng — มั่นคง","提醒 tíxǐng — เตือน"]},
+{id:30,cat:"สังคม",q:"你喜欢中国文化的哪些方面？",py:"Nǐ xǐhuān Zhōngguó wénhuà de nǎxiē fāngmiàn?",th:"คุณชอบวัฒนธรรมจีนด้านไหนบ้าง",ans:{cn:"我很喜欢中国文化的很多方面。首先，我喜欢中国的传统节日，比如春节、中秋节，这些节日让家人团聚在一起。其次，我对中国的功夫和太极很感兴趣，觉得非常神奇。另外，中国的书法和绘画也让我很着迷，感觉很有艺术感。当然，中国的美食也是我喜欢的重要原因之一。",py:"Wǒ hěn xǐhuān Zhōngguó wénhuà de hěn duō fāngmiàn. Shǒuxiān, wǒ xǐhuān Zhōngguó de chuántǒng jiérì, bǐrú Chūnjié, Zhōngqiūjié, zhèxiē jiérì ràng jiārén tuánjù zài yīqǐ. Qícì, wǒ duì Zhōngguó de gōngfu hé tàijí hěn gǎn xìngqù, juéde fēicháng shénjī. Lìngwài, Zhōngguó de shūfǎ hé huìhuà yě ràng wǒ hěn zháomí, gǎnjué hěn yǒu yìshùgǎn. Dāngrán, Zhōngguó de měishí yě shì wǒ xǐhuān de zhòngyào yuányīn zhī yī.",th:"ชอบวัฒนธรรมจีนหลายด้าน ประการแรกชอบเทศกาลดั้งเดิมของจีน เช่น ตรุษจีน เทศกาลไหว้พระจันทร์ เทศกาลเหล่านี้ทำให้ครอบครัวมาร่วมกัน ประการที่สองสนใจกังฟูและไทชิ รู้สึกว่าน่าอัศจรรย์มาก นอกจากนี้การเขียนพู่กันจีนและจิตรกรรมจีนก็ทำให้หลงใหล รู้สึกมีความเป็นศิลปะมาก แน่นอนอาหารจีนก็เป็นเหตุผลสำคัญที่ชอบวัฒนธรรมจีน"},vocab:["传统 chuántǒng — ดั้งเดิม/ประเพณี","团聚 tuánjù — รวมญาติ","书法 shūfǎ — การเขียนพู่กันจีน"]}
+];
+
+let done=new Set();
+let cur='all';
+
+function render(){
+  const list=document.getElementById('list');
+  const items=cur==='all'?data:data.filter(x=>x.cat===cur);
+  list.innerHTML='';
+  items.forEach(q=>{
+    const d=done.has(q.id);
+    const el=document.createElement('div');
+    el.className='card'+(d?' done':'');
+    el.innerHTML=`
+      <div class="card-top">
+        <span class="num">${q.id}</span>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="topic-badge">${q.cat}</span>
+          </div>
+          <div class="q-cn">${q.q}</div>
+          <div class="q-py">${q.py}</div>
+          <div class="q-th">${q.th}</div>
+          <div class="expand" id="exp-${q.id}">▸ ดูแนวทางตอบ</div>
+          <div class="answer-box" id="ans-${q.id}">
+            <h4>แนวทางการตอบ</h4>
+            <div class="answer-line">
+              <div class="answer-cn">${q.ans.cn}</div>
+              <div class="answer-py">${q.ans.py}</div>
+              <div class="answer-th">${q.ans.th}</div>
+            </div>
+            <div class="vocab">
+              <h4>คำศัพท์สำคัญ</h4>
+              <div class="vocab-list">${q.vocab.map(v=>`<span class="vocab-item">${v}</span>`).join('')}</div>
+            </div>
+            <button class="done-btn${d?' marked':''}" id="btn-${q.id}">${d?'✓ ฝึกแล้ว':'ทำเครื่องหมายว่าฝึกแล้ว'}</button>
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(el);
+    document.getElementById('exp-'+q.id).addEventListener('click',e=>{
+      e.stopPropagation();
+      const box=document.getElementById('ans-'+q.id);
+      const exp=document.getElementById('exp-'+q.id);
+      const open=box.classList.toggle('open');
+      exp.textContent=open?'▾ ซ่อนแนวทางตอบ':'▸ ดูแนวทางตอบ';
+    });
+    el.addEventListener('click',()=>{
+      const box=document.getElementById('ans-'+q.id);
+      const exp=document.getElementById('exp-'+q.id);
+      const open=box.classList.toggle('open');
+      exp.textContent=open?'▾ ซ่อนแนวทางตอบ':'▸ ดูแนวทางตอบ';
+    });
+    document.getElementById('btn-'+q.id).addEventListener('click',e=>{
+      e.stopPropagation();
+      if(done.has(q.id)){done.delete(q.id);}else{done.add(q.id);}
+      updateStats();render();
+    });
+  });
+}
+
+function updateStats(){
+  document.getElementById('s-done').textContent=done.size;
+  document.getElementById('s-left').textContent=30-done.size;
+}
+
+document.getElementById('filters').addEventListener('click',e=>{
+  if(!e.target.classList.contains('filter-btn'))return;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  cur=e.target.dataset.cat;
+  render();
+});
+
+render();
+</script>
